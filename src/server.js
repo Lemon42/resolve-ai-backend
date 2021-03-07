@@ -17,7 +17,7 @@ app.use(morgan('dev'));
 app.use(require('./routes'));
 
 // Porta e mensagem de log
-app.listen(3333, () => {
+app.listen(process.env.PORT || 3333, () => {
 	var date = new Date();
 	var logDate = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
 

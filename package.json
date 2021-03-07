@@ -1,16 +1,19 @@
 {
-	"name": "ResolveAi_Backend",
+	"name": "resolve-ai-backend",
 	"version": "1.0.0",
 	"main": "src/server.js",
 	"repository": "https://github.com/Lemon42/resolve-ai-backend.git",
 	"author": "Everton Dias <evertonsrdias@gmail.com>",
 	"license": "MIT",
 	"dependencies": {
+		"azure-storage": "^2.10.3",
 		"cors": "^2.8.5",
 		"dotenv": "^8.2.0",
 		"express": "^4.17.1",
+		"into-stream": "^6.0.0",
 		"morgan": "^1.10.0",
-		"mssql": "^6.3.1"
+		"mssql": "^6.3.1",
+		"multer": "^1.4.2"
 	},
 	"scripts": {
 		"dev": "NODE_ENV=test nodemon src/server.js",
