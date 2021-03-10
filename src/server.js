@@ -1,5 +1,9 @@
+const path = require('path');
+
 require('dotenv').config({
-	path: process.env.NODE_ENV === "test" ? "../.env.testing" : "../.env"
+	path: process.env.NODE_ENV === "test"
+		? path.resolve(__dirname, '..', '.env.testing')
+		: path.resolve(__dirname, '..', '.env')
 });
 
 const express = require('express');
