@@ -1,0 +1,1 @@
+module.exports = ["123456789", "password", "1234567", "12345678", "iloveyou", "qwerty123", "1q2w3e4r", "qwertyuiop", "7777777", "welcome", "password1", "1qaz2wsx", "michael", "sunshine", "liverpool", "1q2w3e4r5t", "freedom", "football", "charlie", "letmein", "!@#$%^&*", "aa123456", "987654321", "zxcvbnm", "passw0rd", "nothing", "senha123", "senha123456"];
