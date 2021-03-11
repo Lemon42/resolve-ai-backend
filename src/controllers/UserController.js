@@ -12,8 +12,19 @@ class UserModel{
 	async createUser(req, res){
 		try {
 			const user = new User(req.body.name, req.body.lastName, req.body.email, req.body.city, req.body.pass);
-			
 			user.pass = encrypt(user.pass);
+
+			// Teste para ver se o email já está cadastrado
+			const pool = await sql.connect(require('../config/databaseConfig'));
+			const emailValidateRequest = pool.request();
+	
+			emailValidateRequest.input('newEmail', sql.VarChar, req.body.email);
+	
+			const result = await emailValidateRequest.query`SELECT Email FROM Users WHERE Email = @newEmail`;
+	
+			if(result.rowsAffected >= 1){
+				throw 'Email já cadastrado!';
+			}
 
 			// Cadastro da imagem de perfil
 			let imageName = '';
@@ -36,8 +47,7 @@ class UserModel{
 				});
 			}
 	
-			// Envio para o servidor
-			const pool = await sql.connect(require('../config/databaseConfig'));
+			// Envio para o servido
 			const request = pool.request();
 	
 			request.input('name', sql.VarChar, user.name);
@@ -49,7 +59,7 @@ class UserModel{
 	
 			request.query`INSERT INTO Users (Name, LastName, Email, City, Picture, Pass) VALUES 
 				(@name, @lastName, @email, @city, @picture, @pass)`;
-	
+
 			res.sendStatus(200);
 			
 		} catch (err) {
