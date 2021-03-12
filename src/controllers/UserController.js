@@ -14,16 +14,26 @@ class UserModel{
 			const user = new User(req.body.name, req.body.lastName, req.body.email, req.body.city, req.body.pass);
 			user.pass = encrypt(user.pass);
 
-			// Teste para ver se o email já está cadastrado
 			const pool = await sql.connect(require('../config/databaseConfig'));
+
+			// Teste para ver se o email já está cadastrado
 			const emailValidateRequest = pool.request();
 	
 			emailValidateRequest.input('newEmail', sql.VarChar, req.body.email);
-	
-			const result = await emailValidateRequest.query`SELECT Email FROM Users WHERE Email = @newEmail`;
-	
-			if(result.rowsAffected >= 1){
+			const emailResult = await emailValidateRequest.query`SELECT Email FROM Users WHERE Email = @newEmail`;
+
+			if(emailResult.rowsAffected >= 1){
 				throw 'Email já cadastrado!';
+			}
+
+			// Teste para ver se a cidade pode ser cadastrada
+			const cityValidateRequest = pool.request();
+	
+			cityValidateRequest.input('newCity', sql.VarChar, req.body.city);
+			const cityResult = await cityValidateRequest.query`SELECT Name FROM City WHERE Name = @newCity`;
+
+			if(cityResult.rowsAffected != 1){
+				throw 'Não estamos nessa cidade';
 			}
 
 			// Cadastro da imagem de perfil
@@ -39,7 +49,7 @@ class UserModel{
 				const stream = getStream(req.file.buffer);
 				const streamLength = req.file.buffer.length;
 		
-				blobService.createBlockBlobFromStream(process.env.IMAGES_STORAGE_CONTAINER, imageName, stream, streamLength, err => {
+				blobService.createBlockBlobFromStream(imageContainer, imageName, stream, streamLength, err => {
 					if (err) {
 						handleError(err);
 						return;
@@ -47,7 +57,7 @@ class UserModel{
 				});
 			}
 	
-			// Envio para o servido
+			// Envio para o servidor
 			const request = pool.request();
 	
 			request.input('name', sql.VarChar, user.name);
