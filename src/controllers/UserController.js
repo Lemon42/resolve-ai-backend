@@ -75,7 +75,7 @@ class UserModel{
 			
 		} catch (err) {
 			console.error(err);
-			res.status(400).json({ error: 'Preenchimento invalido de informações!', type: err});
+			res.json({ error: 'Preenchimento invalido de informações!', type: err});
 			return;
 		}
 	}
@@ -104,10 +104,10 @@ class UserModel{
 					lastName: user.recordset[0].LastName
 				})
 			} else {
-				res.status(400).json({ error: 'Tipo de conta inválida' });
+				res.json({ error: 'Tipo de conta inválida' });
 			}
 		} else { // Não autenticado
-			res.sendStatus(401);
+			res.json({ error: 'Credenciais inválidas!' });
 		}
 	}
 
@@ -124,7 +124,7 @@ class UserModel{
 		if(response.rowsAffected == 1){
 			res.sendStatus(200);
 		} else {
-			res.status(401).json({ error: 'Credenciais invalidas!'});
+			res.json({ error: 'Credenciais invalidas!'});
 		}
 	}
 }
