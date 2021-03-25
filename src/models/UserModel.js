@@ -9,7 +9,7 @@ class User extends DataValidation {
 		super();
 		this.name = this.stringValidation(name);
 		this.lastName = this.stringValidation(lastName);
-		this.email = this.emailValidation(email);
+		this.email = this.emailValidation(email).toLowerCase();
 		this.city = this.stringValidation(city);
 		this.pass = this.passValidation(pass);
 	}

@@ -84,7 +84,7 @@ class UserModel{
 		const pool = await sql.connect(require('../config/databaseConfig'));
 		const request = pool.request();
 
-		request.input('email', sql.VarChar, req.body.email);
+		request.input('email', sql.VarChar, req.body.email.toLowerCase());
 		request.input('pass', sql.VarChar, encrypt(req.body.pass));
 
 		const user = await request.query`SELECT * FROM Users WHERE Email = @email AND Pass = @pass`;
@@ -106,6 +106,29 @@ class UserModel{
 			} else {
 				res.json({ error: 'Tipo de conta inválida' });
 			}
+		} else { // Não autenticado
+			res.json({ error: 'Credenciais inválidas!' });
+		}
+	}
+
+	async validate(req, res) {
+		const pool = await sql.connect(require('../config/databaseConfig'));
+		const request = pool.request();
+
+		request.input('email', sql.VarChar, req.body.email.toLowerCase());
+		request.input('token', sql.VarChar, req.body.token);
+
+		const validate = await request.query`SELECT * FROM Authentications
+			WHERE Account = @email AND Token = @token`;
+		
+		if(validate.rowsAffected == 1){ // Autenticado
+			const user = await request.query`SELECT * FROM Users WHERE Email = @email`;
+			
+			res.json({
+				picture: user.recordset[0].Picture,
+				name: user.recordset[0].Name,
+				lastName: user.recordset[0].LastName
+			})
 		} else { // Não autenticado
 			res.json({ error: 'Credenciais inválidas!' });
 		}
