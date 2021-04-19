@@ -1,7 +1,7 @@
 class DataValidation{
 	stringValidation(string){
 		if (string != "") {
-			return trim(string);
+			return string.trim();
 		} else {
 			throw 'Campo nulo';
 		}
