@@ -16,7 +16,7 @@ class User extends DataValidation {
 
 	emailValidation(email) {
 		if(!emailValidator.validate(email)){
-			throw 'Email invalido!';
+			throw 'Email inválido!';
 		}
 
 		return email;
@@ -24,7 +24,7 @@ class User extends DataValidation {
 
 	passValidation(pass) {
 		if(pass.length <= 7){
-			throw 'Senha invalida, muito curta!';
+			throw 'Senha inválida, muito curta!';
 		}
 
 		let isValid = true;
@@ -35,7 +35,7 @@ class User extends DataValidation {
 		}))
 
 		if (!isValid){
-			throw 'Senha invalida!';
+			throw 'Senha inválida!';
 		}
 
 		return pass;

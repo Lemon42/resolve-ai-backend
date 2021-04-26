@@ -75,7 +75,7 @@ class UserModel{
 			
 		} catch (err) {
 			console.error(err);
-			res.json({ error: 'Preenchimento invalido de informações!', type: err});
+			res.json({ error: 'Preenchimento inválido de informações!', type: err});
 			return;
 		}
 	}
