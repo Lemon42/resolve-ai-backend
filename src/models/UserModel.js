@@ -8,7 +8,7 @@ class User extends DataValidation {
 	constructor(name, lastName, email, city, pass) {
 		super();
 		this.name = this.stringValidation(name);
-		this.lastName = lastName.trim();
+		this.lastName = lastName ? lastName.trim() : '';
 		this.email = this.emailValidation(email).toLowerCase();
 		this.city = this.stringValidation(city);
 		this.pass = this.passValidation(pass);
