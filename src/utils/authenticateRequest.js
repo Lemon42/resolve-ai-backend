@@ -2,7 +2,7 @@ const sql = require('mssql');
 
 async function authenticateRequest(req, res, next){
 	if(!req.headers.token || !req.headers.email){
-		res.status(401).json({ error: 'Informações não encontradas!'});
+		res.status(401).json({ error: 'Informações de autenticação não encontradas!'});
 
 	} else {
 		const pool = await sql.connect(require('../config/databaseConfig'));

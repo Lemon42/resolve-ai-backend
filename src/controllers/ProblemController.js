@@ -45,17 +45,21 @@ class ProblemController {
 			request.query`INSERT INTO Problems (Title, Description) VALUES (@title, @description)`;
 
 			// Pegando ID do problema inserido
-			let lastId = await request.query`SELECT IDENT_CURRENT('Problems') as lastId`;
-			lastId = lastId.recordset[0].lastId; 
+			let problemId = await request.query`SELECT IDENT_CURRENT('Problems') as lastId`;
+			problemId = problemId.recordset[0].lastId; 
 
 			// Cadastro das imagens no servidor SQL
 			if (imagesName.length != 0) {
 				imagesName.forEach((name, index) => {
 					request.input(`nameInput${index}`, sql.VarChar, name);
-					request.query('INSERT INTO ProblemImages (name, imageId) VALUES (@nameInput' + index + ', ' + lastId + ')');
+					request.query('INSERT INTO ProblemImages (name, problemId) VALUES (@nameInput' + index + ', ' + problemId + ')');
 					// OBS.: Não utilize Template Strings neste caso pois gera um erro no SQL
 				});
 			}
+
+			// Registro de problema na conta do usuário
+			request.input('email', sql.VarChar, req.headers.email);
+			request.query`INSERT INTO ProblemUser (Account, ProblemID) VALUES (@email, ${problemId})`;
 
 			res.sendStatus(201);
 		} catch (err) {
