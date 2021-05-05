@@ -5,12 +5,19 @@ const getBlobName = require('../utils/getBlobName');
 
 const Problem = require('../models/ProblemModel');
 
+const locationValidation = require('../utils/locationValidation');
 const blobService = azureStorage.createBlobService();
 
 class ProblemController {
 	async createProblem(req, res) {
 		try {
 			const problem = new Problem(req.body.title, req.body.description);
+
+			// Descobrindo a cidade onde está localizado o problema
+			const cityIsValid = await locationValidation(req.body.latitude, req.body.longitude);
+			if (!cityIsValid) {
+				res.json({ error: 'Não estamos nessa cidade' });
+			}
 
 			// Cadastro das imagens
 			const imagesName = [];
