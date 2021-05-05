@@ -16,7 +16,7 @@ async function locationValidation(lat, lon) {
 				if (cityResult.rowsAffected != 1) {
 					return false;
 				} else {
-					return true;
+					return city;
 				}
 			}
 

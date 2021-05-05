@@ -14,8 +14,8 @@ class ProblemController {
 			const problem = new Problem(req.body.title, req.body.description);
 
 			// Descobrindo a cidade onde está localizado o problema
-			const cityIsValid = await locationValidation(req.body.latitude, req.body.longitude);
-			if (!cityIsValid) {
+			const city= await locationValidation(req.body.latitude, req.body.longitude);
+			if (city == false) {
 				res.json({ error: 'Não estamos nessa cidade' });
 			}
 
@@ -49,11 +49,16 @@ class ProblemController {
 
 			request.input('title', sql.VarChar, problem.title);
 			request.input('description', sql.VarChar, problem.description);
-			request.query`INSERT INTO Problems (Title, Description) VALUES (@title, @description)`;
+			request.input('city', sql.VarChar, city);
+			request.input('lat', sql.Real, req.body.latitude);
+			request.input('lon', sql.Real, req.body.longitude);
+
+			request.query`INSERT INTO Problems (Title, Description, City, Latitude, Longitude) 
+				VALUES (@title, @description, @city, @lat, @lon)`;
 
 			// Pegando ID do problema inserido
 			let problemId = await request.query`SELECT IDENT_CURRENT('Problems') as lastId`;
-			problemId = problemId.recordset[0].lastId; 
+			problemId = problemId.recordset[0].lastId;
 
 			// Cadastro das imagens no servidor SQL
 			if (imagesName.length != 0) {
