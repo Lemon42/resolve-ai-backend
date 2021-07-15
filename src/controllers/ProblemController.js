@@ -14,7 +14,7 @@ class ProblemController {
 			const problem = new Problem(req.body.title, req.body.description);
 
 			// Descobrindo a cidade onde está localizado o problema
-			const city= await locationValidation(req.body.latitude, req.body.longitude);
+			const city = await locationValidation(req.body.latitude, req.body.longitude);
 			if (city == false) {
 				res.json({ error: 'Não estamos nessa cidade' });
 				return;
@@ -51,8 +51,8 @@ class ProblemController {
 			request.input('title', sql.VarChar, problem.title);
 			request.input('description', sql.VarChar, problem.description);
 			request.input('city', sql.VarChar, city);
-			request.input('lat', sql.Real, req.body.latitude);
-			request.input('lon', sql.Real, req.body.longitude);
+			request.input('lat', sql.VarChar, req.body.latitude);
+			request.input('lon', sql.VarChar, req.body.longitude);
 
 			request.query`INSERT INTO Problems (Title, Description, City, Latitude, Longitude) 
 				VALUES (@title, @description, @city, @lat, @lon)`;
@@ -106,7 +106,7 @@ class ProblemController {
 		const images = await Promise.all(imagesPromise);
 
 		const response = images.map((image, index) => {
-			return { data: data[index], images: image.recordset}
+			return { data: data[index], images: image.recordset }
 		});
 
 		res.json(response);
