@@ -9,7 +9,7 @@ const locationValidation = require('../utils/locationValidation');
 const blobService = azureStorage.createBlobService();
 
 class ProblemController {
-	async createProblem(req, res) {
+	async create(req, res) {
 		try {
 			const problem = new Problem(req.body.title, req.body.description);
 
@@ -17,6 +17,7 @@ class ProblemController {
 			const city= await locationValidation(req.body.latitude, req.body.longitude);
 			if (city == false) {
 				res.json({ error: 'Não estamos nessa cidade' });
+				return;
 			}
 
 			// Cadastro das imagens
@@ -79,6 +80,36 @@ class ProblemController {
 			res.json({ error: 'Preenchimento inválido de informações!', type: err });
 			return;
 		}
+	}
+
+	async list(req, res){
+		const pool = await sql.connect(require('../config/databaseConfig'));
+		const request = pool.request();
+		var dataResponse;
+
+		// Verificando se a requisição quer em uma cidade especifica
+		if(req.body.city){
+			request.input('city', sql.VarChar, req.body.city);
+			dataResponse = await request.query(`SELECT * FROM Problems WHERE city = @city`);	
+		} else {
+			dataResponse = await request.query(`SELECT * FROM Problems`);
+		}
+		
+
+		var data = dataResponse.recordset;
+
+		// Pegando as imagens de cada problema
+		const imagesPromise = data.map((problem) => {
+			let newRequest = request.query(`SELECT * FROM ProblemImages WHERE ProblemID = ${problem.ID}`);
+			return newRequest;
+		});
+		const images = await Promise.all(imagesPromise);
+
+		const response = images.map((image, index) => {
+			return { data: data[index], images: image.recordset}
+		});
+
+		res.json(response);
 	}
 }
 

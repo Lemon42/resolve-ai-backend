@@ -10,7 +10,7 @@ const getBlobName = require('../utils/getBlobName');
 const blobService = azureStorage.createBlobService();
 
 class UserModel{
-	async createUser(req, res){
+	async create(req, res){
 		try {
 			const user = new User(req.body.name, req.body.lastName, req.body.email, req.body.city, req.body.pass);
 			user.pass = encrypt(user.pass);
@@ -80,7 +80,7 @@ class UserModel{
 		}
 	}
 
-	async authenticationUser(req, res){
+	async authentication(req, res){
 		const pool = await sql.connect(require('../config/databaseConfig'));
 		const request = pool.request();
 

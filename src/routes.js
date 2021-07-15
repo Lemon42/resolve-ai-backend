@@ -10,12 +10,13 @@ const problemController = new ProblemController();
 
 const authenticate = require('./utils/authenticateRequest');
 
-routes.post('/create-user', uploadImage.single('picture'), (req, res) => userController.createUser(req, res));
-routes.post('/login', (req, res) => userController.authenticationUser(req, res));
+routes.post('/create-user', uploadImage.single('picture'), (req, res) => userController.create(req, res));
+routes.post('/login', (req, res) => userController.authentication(req, res));
 routes.post('/validate', (req, res) => userController.validate(req, res));
 routes.delete('/logout', (req, res) => userController.logout(req, res));
 
 routes.post('/create-problem', authenticate, uploadImage.array('images[]', 5),
-	(req, res) => problemController.createProblem(req, res));
+	(req, res) => problemController.create(req, res));
+routes.get('/list-problems', authenticate, (req, res) => problemController.list(req, res));
 
 module.exports = routes;
