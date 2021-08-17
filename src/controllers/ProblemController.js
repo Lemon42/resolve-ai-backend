@@ -88,8 +88,8 @@ class ProblemController {
 		var dataResponse;
 
 		// Verificando se a requisição quer em uma cidade especifica
-		if(req.body.city){
-			request.input('city', sql.VarChar, req.body.city);
+		if(req.headers.city){
+			request.input('city', sql.VarChar, req.headers.city);
 			dataResponse = await request.query(`SELECT * FROM Problems WHERE city = @city`);	
 		} else {
 			dataResponse = await request.query(`SELECT * FROM Problems`);

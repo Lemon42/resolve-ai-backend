@@ -12,7 +12,7 @@ const blobService = azureStorage.createBlobService();
 class UserModel{
 	async create(req, res){
 		try {
-			const user = new User(req.body.name, req.body.lastName, req.body.email, req.body.city, req.body.pass);
+			const user = new User(req.body.name, req.body.email, req.body.city, req.body.pass);
 			user.pass = encrypt(user.pass);
 
 			const pool = await sql.connect(require('../config/databaseConfig'));
@@ -62,14 +62,13 @@ class UserModel{
 			const request = pool.request();
 	
 			request.input('name', sql.VarChar, user.name);
-			request.input('lastName', sql.VarChar, user.lastName);
 			request.input('email', sql.VarChar, user.email);
 			request.input('city', sql.VarChar, user.city);
 			request.input('picture', sql.VarChar, `${process.env.STORAGE_URL}/${imageContainer}/${imageName}`);
 			request.input('pass', sql.VarChar, user.pass);
 	
-			request.query`INSERT INTO Users (Name, LastName, Email, City, Picture, Pass) VALUES 
-				(@name, @lastName, @email, @city, @picture, @pass)`;
+			request.query`INSERT INTO Users (Name, Email, City, Picture, Pass) VALUES 
+				(@name, @email, @city, @picture, @pass)`;
 
 			res.sendStatus(201);
 			

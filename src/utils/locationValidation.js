@@ -2,7 +2,7 @@ const axios = require('axios');
 const sql = require('mssql');
 
 async function locationValidation(lat, lon) {
-	return await axios.get(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`)
+	return await axios.get(`																																											`)
 		.then(async (response) => {
 			const pool = await sql.connect(require('../config/databaseConfig'));
 			const request = pool.request();

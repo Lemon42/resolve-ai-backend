@@ -5,10 +5,9 @@ const DataValidation = new require('./DataValidation');
 const invalidPassList =  require('../utils/invalidPassList');
 
 class User extends DataValidation {
-	constructor(name, lastName, email, city, pass) {
+	constructor(name, email, city, pass) {
 		super();
 		this.name = this.stringValidation(name);
-		this.lastName = lastName ? lastName.trim() : '';
 		this.city = this.stringValidation(city);
 		this.pass = this.passValidation(pass);
 		
