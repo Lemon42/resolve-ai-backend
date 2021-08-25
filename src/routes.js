@@ -17,6 +17,7 @@ routes.delete('/logout', (req, res) => userController.logout(req, res));
 
 routes.post('/create-problem', authenticate, uploadImage.array('images[]', 5),
 	(req, res) => problemController.create(req, res));
-routes.get('/list-problems', authenticate, (req, res) => problemController.list(req, res));
+routes.get('/list-problems/', authenticate, (req, res) => problemController.list(req, res));
+routes.get('/list-problems/:city', authenticate, (req, res) => problemController.listInCity(req, res));
 
 module.exports = routes;

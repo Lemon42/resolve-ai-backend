@@ -85,16 +85,30 @@ class ProblemController {
 	async list(req, res){
 		const pool = await sql.connect(require('../config/databaseConfig'));
 		const request = pool.request();
-		var dataResponse;
+		const dataResponse = await request.query(`SELECT * FROM Problems`);
 
-		// Verificando se a requisição quer em uma cidade especifica
-		if(req.headers.city){
-			request.input('city', sql.VarChar, req.headers.city);
-			dataResponse = await request.query(`SELECT * FROM Problems WHERE city = @city`);	
-		} else {
-			dataResponse = await request.query(`SELECT * FROM Problems`);
-		}
+		var data = dataResponse.recordset;
+
+		// Pegando as imagens de cada problema
+		const imagesPromise = data.map((problem) => {
+			let newRequest = request.query(`SELECT * FROM ProblemImages WHERE ProblemID = ${problem.ID}`);
+			return newRequest;
+		});
+		const images = await Promise.all(imagesPromise);
+
+		const response = images.map((image, index) => {
+			return { data: data[index], images: image.recordset }
+		});
+
+		res.json(response);
+	}
+
+	async listInCity(req, res){
+		const pool = await sql.connect(require('../config/databaseConfig'));
+		const request = pool.request();
 		
+		request.input('city', sql.VarChar, req.params.city);
+		const dataResponse = await request.query(`SELECT * FROM Problems WHERE city = @city`);
 
 		var data = dataResponse.recordset;
 
