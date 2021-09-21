@@ -100,7 +100,6 @@ class UserModel{
 					email: user.recordset[0].Email,
 					picture: user.recordset[0].Picture,
 					name: user.recordset[0].Name,
-					lastName: user.recordset[0].LastName
 				})
 			} else {
 				res.json({ error: 'Tipo de conta inválida' });
@@ -126,7 +125,6 @@ class UserModel{
 			res.json({
 				picture: user.recordset[0].Picture,
 				name: user.recordset[0].Name,
-				lastName: user.recordset[0].LastName
 			})
 		} else { // Não autenticado
 			res.json({ error: 'Credenciais inválidas!' });
