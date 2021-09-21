@@ -22,14 +22,15 @@ class ProblemController {
 
 			// Cadastro das imagens
 			const imagesName = [];
+			let imageContainer = process.env.IMAGES_STORAGE_CONTAINER;
+			let imageUrl = process.env.STORAGE_URL;
 
 			if (req.files.length != 0) {
 				let imageName = '';
-				let imageContainer = '';
 
 				req.files.forEach((image) => {
-					imageName = getBlobName(image.originalname)
-					imageContainer = process.env.IMAGES_STORAGE_CONTAINER;
+					imageName = getBlobName(image.originalname);
+					
 					const stream = getStream(image.buffer);
 					const streamLength = image.buffer.length;
 
@@ -63,10 +64,14 @@ class ProblemController {
 
 			// Cadastro das imagens no servidor SQL
 			if (imagesName.length != 0) {
-				imagesName.forEach((name, index) => {
-					request.input(`nameInput${index}`, sql.VarChar, name);
+				var newImagesName = imagesName.map((name, index) => {
+					let newImageName = `${imageUrl}/${imageContainer}/${name}`;
+
+					request.input(`nameInput${index}`, sql.VarChar, newImageName);
 					request.query('INSERT INTO ProblemImages (name, problemId) VALUES (@nameInput' + index + ', ' + problemId + ')');
 					// OBS.: Não utilize Template Strings neste caso pois gera um erro no SQL
+
+					return newImageName;
 				});
 			}
 
@@ -74,7 +79,10 @@ class ProblemController {
 			request.input('email', sql.VarChar, req.headers.email);
 			request.query`INSERT INTO ProblemUser (Account, ProblemID) VALUES (@email, ${problemId})`;
 
-			res.sendStatus(201);
+			// Mandando o registro de volta para o front-end
+			const responseData = await request.query(`SELECT * FROM Problems WHERE ID = ${problemId}`);
+
+			res.status(201).json({ data: responseData.recordset, images: newImagesName });
 		} catch (err) {
 			console.error(err);
 			res.json({ error: 'Preenchimento inválido de informações!', type: err });
@@ -82,7 +90,7 @@ class ProblemController {
 		}
 	}
 
-	async list(req, res){
+	async list(req, res) {
 		const pool = await sql.connect(require('../config/databaseConfig'));
 		const request = pool.request();
 		const dataResponse = await request.query(`SELECT * FROM Problems`);
@@ -103,10 +111,10 @@ class ProblemController {
 		res.json(response);
 	}
 
-	async listInCity(req, res){
+	async listInCity(req, res) {
 		const pool = await sql.connect(require('../config/databaseConfig'));
 		const request = pool.request();
-		
+
 		request.input('city', sql.VarChar, req.params.city);
 		const dataResponse = await request.query(`SELECT * FROM Problems WHERE city = @city`);
 
