@@ -6,5 +6,8 @@ module.exports = {
 	"options": {
 		"encrypt": true,
 		"enableArithAbort": true
+	},
+	pool: {
+		min: 5
 	}
 }

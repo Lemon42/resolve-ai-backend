@@ -1,4 +1,3 @@
-const sql = require('mssql');
 const emailValidator = require('email-validator');
 
 const DataValidation = new require('./DataValidation');
