@@ -20,4 +20,6 @@ routes.post('/create-problem', authenticate, uploadImage.array('images[]', 5),
 routes.get('/list-problems/', authenticate, (req, res) => problemController.list(req, res));
 routes.get('/list-problems/:city', authenticate, (req, res) => problemController.listInCity(req, res));
 
+routes.post('/create-comment', authenticate, (req, res) => problemController.createComment(req, res));
+
 module.exports = routes;

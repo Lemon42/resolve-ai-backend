@@ -4,6 +4,7 @@ const getStream = require('into-stream');
 const getBlobName = require('../utils/getBlobName');
 
 const Problem = require('../models/ProblemModel');
+const Comment = require('../models/CommentModel');
 
 const locationValidation = require('../utils/locationValidation');
 const blobService = azureStorage.createBlobService();
@@ -132,6 +133,37 @@ class ProblemController {
 		});
 
 		res.json(response);
+	}
+
+	/***************/
+	/* Comentarios */
+	/***************/
+	async createComment(req, res){
+		try{
+			const comment =  new Comment(req.body.content);
+	
+			const pool = await sql.connect(require('../config/databaseConfig'));
+			const request = pool.request();
+			
+			request.input('content', sql.VarChar, comment.content);
+			request.input('email', sql.VarChar, req.headers.email);
+			request.input('problemId', sql.VarChar, req.body.problemId);
+
+			// Validação de ID de problemas que
+			let response = await request.query`SELECT ID FROM Problems WHERE ID = @problemId`;
+
+			if(response.rowsAffected == 1) {
+				response = await request.query`INSERT INTO Comments VALUES (@content, @email, @problemId)`;
+			} else {
+				throw 'O problema não existe.';
+			}
+
+			res.json({ mensagem: 'salve'});
+		} catch (err){
+			console.error(err);
+			res.json({ error: 'Preenchimento inválido de informações!', type: err });
+			return;
+		}
 	}
 }
 
