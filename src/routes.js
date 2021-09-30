@@ -21,5 +21,6 @@ routes.get('/list-problems/', authenticate, (req, res) => problemController.list
 routes.get('/list-problems/:city', authenticate, (req, res) => problemController.listInCity(req, res));
 
 routes.post('/create-comment', authenticate, (req, res) => problemController.createComment(req, res));
+routes.get('/comment/:id', authenticate, (req, res) => problemController.listComments(req, res));
 
 module.exports = routes;
