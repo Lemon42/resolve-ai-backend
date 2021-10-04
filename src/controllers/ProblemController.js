@@ -100,13 +100,19 @@ class ProblemController {
 
 		// Pegando as imagens de cada problema
 		const imagesPromise = data.map((problem) => {
-			let newRequest = request.query(`SELECT * FROM ProblemImages WHERE ProblemID = ${problem.ID}`);
+			let newRequest = request.query(`SELECT Name FROM ProblemImages WHERE ProblemID = ${problem.ID}`);
 			return newRequest;
 		});
 		const images = await Promise.all(imagesPromise);
 
 		const response = images.map((image, index) => {
-			return { data: data[index], images: image.recordset }
+			let responseImage = image.recordset.map((object) => {
+				if(object.Name){
+					return object.Name
+				}
+			});
+
+			return { data: data[index], images: responseImage }
 		});
 
 		res.json(response);
@@ -123,13 +129,19 @@ class ProblemController {
 
 		// Pegando as imagens de cada problema
 		const imagesPromise = data.map((problem) => {
-			let newRequest = request.query(`SELECT * FROM ProblemImages WHERE ProblemID = ${problem.ID}`);
+			let newRequest = request.query(`SELECT Name FROM ProblemImages WHERE ProblemID = ${problem.ID}`);
 			return newRequest;
 		});
-		const images = await Promise.all(imagesPromise);
+		let images = await Promise.all(imagesPromise);
 
 		const response = images.map((image, index) => {
-			return { data: data[index], images: image.recordset }
+			let responseImage = image.recordset.map((object) => {
+				if(object.Name){
+					return object.Name
+				}
+			});
+
+			return { data: data[index], images: responseImage }
 		});
 
 		res.json(response);
