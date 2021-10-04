@@ -60,8 +60,8 @@ class ProblemController {
 				VALUES (@title, @description, @city, @lat, @lon)`;
 
 			// Pegando ID do problema inserido
-			let problemId = await request.query`SELECT IDENT_CURRENT('Problems') as lastId`;
-			problemId = problemId.recordset[0].lastId;
+			let problemId = await request.query`SELECT TOP 1 ID FROM Problems ORDER BY ID DESC`;
+			problemId = problemId.recordset[0].ID;
 
 			// Cadastro das imagens no servidor SQL
 			if (imagesName.length != 0) {
@@ -83,7 +83,7 @@ class ProblemController {
 			// Mandando o registro de volta para o front-end
 			const responseData = await request.query(`SELECT * FROM Problems WHERE ID = ${problemId}`);
 
-			res.status(201).json({ data: responseData.recordset, images: newImagesName });
+			res.status(201).json({ data: responseData.recordset[0], images: newImagesName });
 		} catch (err) {
 			console.error(err);
 			res.json({ error: 'Preenchimento inválido de informações!', type: err });
