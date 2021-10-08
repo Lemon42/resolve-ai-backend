@@ -7,6 +7,8 @@ const UserController = require('./controllers/UserController');
 const userController = new UserController();
 const ProblemController = require('./controllers/ProblemController');
 const problemController = new ProblemController();
+const CommentController = require('./controllers/CommentController');
+const commentController = new CommentController();
 
 const authenticate = require('./utils/authenticateRequest');
 
@@ -20,7 +22,7 @@ routes.post('/create-problem', authenticate, uploadImage.array('images[]', 5),
 routes.get('/list-problems/', authenticate, (req, res) => problemController.list(req, res));
 routes.get('/list-problems/:city', authenticate, (req, res) => problemController.listInCity(req, res));
 
-routes.post('/create-comment', authenticate, (req, res) => problemController.createComment(req, res));
-routes.get('/comment/:id', authenticate, (req, res) => problemController.listComments(req, res));
+routes.post('/create-comment', authenticate, (req, res) => commentController.createComment(req, res));
+routes.get('/comment/:id', authenticate, (req, res) => commentController.listComments(req, res));
 
 module.exports = routes;
