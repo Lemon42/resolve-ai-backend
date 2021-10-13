@@ -24,5 +24,7 @@ routes.get('/list-problems/:city', authenticate, (req, res) => problemController
 
 routes.post('/create-comment', authenticate, (req, res) => commentController.createComment(req, res));
 routes.get('/comment/:id', authenticate, (req, res) => commentController.listComments(req, res));
+routes.delete('/comment/:commentId/problem/:problemId', authenticate, (req, res) => commentController.deleteComment(req, res));
+routes.post('/report-comment/:commentId/problem/:problemId', authenticate, (req, res) => commentController.reportComment(req, res));
 
 module.exports = routes;
