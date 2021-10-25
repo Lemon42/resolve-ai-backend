@@ -5,7 +5,6 @@ const getBlobName = require('../utils/getBlobName');
 
 const Problem = require('../models/ProblemModel');
 
-
 const locationValidation = require('../utils/locationValidation');
 const blobService = azureStorage.createBlobService();
 
@@ -141,9 +140,40 @@ class ProblemController {
 		const response = images.map((image, index) => {
 			let responseImage = image.recordset.map((object) => {
 				if (object.Name) {
-					return object.Name
+					return object.Name;
 				}
 			});
+
+			return { data: data[index], images: responseImage }
+		});
+
+		res.json(response);
+	}
+
+	async searchTitle(req, res) {
+		const pool = await sql.connect(require('../config/databaseConfig'));
+		const request = pool.request();
+
+		
+		const dataResponse = await request.query(`SELECT * FROM Problems`);
+
+		var data = dataResponse.recordset;
+
+		// Pegando as imagens de cada problema
+		const imagesPromise = data.map((problem) => {
+			let newRequest = request.query(`SELECT Name FROM ProblemImages WHERE ProblemID = ${problem.ID}`);
+			return newRequest;
+		});
+		const images = await Promise.all(imagesPromise);
+
+		const response = images.map((image, index) => {
+			let responseImage = image.recordset.map((object) => {
+				if (object.Name) {
+					return object.Name;
+				}
+			});
+		
+			console.log(image.recordset);
 
 			return { data: data[index], images: responseImage }
 		});

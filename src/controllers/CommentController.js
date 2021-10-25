@@ -24,7 +24,10 @@ class CommentController {
 				throw 'O problema não existe.';
 			}
 
-			res.sendStatus(201);
+			let id = await request.query`SELECT TOP 1 ID FROM Comments ORDER BY ID DESC`;
+			id = id.recordset[0].ID;
+
+			res.json({ id: id}).status(201);
 		} catch (err) {
 			console.error(err);
 			res.json({ error: 'Preenchimento inválido de informações!', type: err });
@@ -80,7 +83,7 @@ class CommentController {
 			return;
 		}
 	}
-	
+
 	async reportComment(req, res) {
 		try {
 			const pool = await sql.connect(require('../config/databaseConfig'));
@@ -94,7 +97,7 @@ class CommentController {
 			reports = reports.recordset[0].Reports + 1;
 
 			const comment = await request.query
-				`UPDATE Comments SET Reports = ${reports} WHERE ID = @commentId AND UserEmail = @email AND ProblemID = @problemId`;
+				`UPDATE Comments SET Reports = ${reports} WHERE ID = @commentId AND ProblemID = @problemId`;
 
 			if (comment.rowsAffected != 1) {
 				throw 'Comentário não encontrado!';

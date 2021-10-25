@@ -147,6 +147,16 @@ class UserModel{
 			res.json({ error: 'Credenciais invalidas!'});
 		}
 	}
+
+	async getUserProblems(req, res) {
+		const pool = await sql.connect(require('../config/databaseConfig'));
+		const request = pool.request();
+
+		const data = await request.query`SELECT ProblemID FROM ProblemImages`;
+		const response = data.recordsets[0].map(item => item.ProblemID);
+
+		res.json(response);
+	}
 }
 
 module.exports = UserModel;
