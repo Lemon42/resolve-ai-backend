@@ -6,6 +6,8 @@ const getBlobName = require('../utils/getBlobName');
 const Problem = require('../models/ProblemModel');
 
 const locationValidation = require('../utils/locationValidation');
+const cityValidation = require('../utils/cityValidation');
+
 const blobService = azureStorage.createBlobService();
 
 class ProblemController {
@@ -150,35 +152,92 @@ class ProblemController {
 		res.json(response);
 	}
 
-	async searchTitle(req, res) {
-		const pool = await sql.connect(require('../config/databaseConfig'));
-		const request = pool.request();
+	async search(req, res) {
+		try {
+			const params = req.params;
 
-		
-		const dataResponse = await request.query(`SELECT * FROM Problems`);
+			// Verificando informações de envio
+			if (params.user != 'true' && params.user != 'false') {
+				throw 'Não foi possivel compreender o campo de usuario.';
+			} else if (!cityValidation(params.city) && params.city != 'false') {
+				throw 'Não estamos nessa cidade.';
+			}
 
-		var data = dataResponse.recordset;
+			// Criando query de forma dinamica
+			let query = 'SELECT * FROM Problems ';
+			let queryParams = [];
 
-		// Pegando as imagens de cada problema
-		const imagesPromise = data.map((problem) => {
-			let newRequest = request.query(`SELECT Name FROM ProblemImages WHERE ProblemID = ${problem.ID}`);
-			return newRequest;
-		});
-		const images = await Promise.all(imagesPromise);
+			const pool = await sql.connect(require('../config/databaseConfig'));
+			const request = pool.request();
 
-		const response = images.map((image, index) => {
-			let responseImage = image.recordset.map((object) => {
-				if (object.Name) {
-					return object.Name;
+			request.input('title', sql.VarChar, '%' + params.title + '%');
+			request.input('city', sql.VarChar, params.city);
+
+			if (params.title != 'none') {
+				queryParams.push('Title LIKE @title ');
+			}
+			if (params.city != 'false') {
+				queryParams.push('City = @city ');
+			}
+
+			queryParams.forEach((item, index) => {
+				if (index == 0) {
+					query += `WHERE ${item} `;
+				} else {
+					query += `AND + ${item} `;
 				}
 			});
-		
-			console.log(image.recordset);
 
-			return { data: data[index], images: responseImage }
-		});
+			var data = await request.query(query);
 
-		res.json(response);
+			// Verificando se quer apenas do usuario
+			if (params.user == 'true') {
+				const responseId = await request.query`SELECT ProblemID FROM ProblemImages`;
+				const userProblems = responseId.recordsets[0].map(item => item.ProblemID);
+
+				let newData = [];
+
+				for (let item of data.recordsets[0]) {
+					let isValid = false;
+
+					userProblems.forEach((id) => {
+						if (item.ID == id) {
+							isValid = true;
+						}
+					})
+
+					if (isValid) {
+						newData.push(item);
+					}
+				}
+
+				data = newData;
+			} else {
+				data = data.recordsets[0];
+			}
+
+			// Pegando as imagens de cada problema
+			const imagesPromise = data.map((problem) => {
+				let newRequest = request.query(`SELECT Name FROM ProblemImages WHERE ProblemID = ${problem.ID}`);
+				return newRequest;
+			});
+			const images = await Promise.all(imagesPromise);
+
+			const response = images.map((image, index) => {
+				let responseImage = image.recordset.map((object) => {
+					if (object.Name) {
+						return object.Name;
+					}
+				});
+
+				return { data: data[index], images: responseImage }
+			});
+
+			res.json(response);
+		} catch (err) {
+			console.error(err);
+			res.json({ error: 'Preenchimento inválido de informações!', type: err });
+		}
 	}
 }
 

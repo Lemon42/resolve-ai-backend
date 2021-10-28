@@ -26,13 +26,12 @@ routes.post('/create-problem', authenticate, uploadImage.array('images[]', 5),
 	(req, res) => problemController.create(req, res));
 routes.get('/list-problems/', authenticate, (req, res) => problemController.list(req, res));
 routes.get('/list-problems/:city', authenticate, (req, res) => problemController.listInCity(req, res));
-routes.get('/search/title/:title', authenticate, (req, res) => problemController.searchTitle(req, res));
+routes.get('/search/:title/:city/:user', authenticate,(req, res) => problemController.search(req, res));
 
 // Comentarios
 routes.post('/create-comment', authenticate, (req, res) => commentController.createComment(req, res));
 routes.get('/comment/:id', authenticate, (req, res) => commentController.listComments(req, res));
 routes.delete('/comment/:commentId/problem/:problemId', authenticate, (req, res) => commentController.deleteComment(req, res));
 routes.post('/report-comment/:commentId/problem/:problemId', authenticate, (req, res) => commentController.reportComment(req, res));
-
 
 module.exports = routes;
