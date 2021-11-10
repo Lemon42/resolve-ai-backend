@@ -1,8 +1,8 @@
 class DataValidation{
 	stringValidation(string, maxLength){
 		var newString = string;
-	
-		if (string != "") {
+
+		if (string != "" && typeof string !== "undefined") {
 			newString = string.trim();
 		} else {
 			throw 'Campo nulo';

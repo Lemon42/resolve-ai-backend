@@ -6,6 +6,7 @@ const cryptoJS = require('crypto-js');
 const User = require('../models/UserModel');
 const encrypt = require('../utils/encryptSha');
 const getBlobName = require('../utils/getBlobName');
+const errorHandling = require('../utils/errorHandling');
 
 const blobService = azureStorage.createBlobService();
 
@@ -73,9 +74,7 @@ class UserModel{
 			res.sendStatus(201);
 			
 		} catch (err) {
-			console.error(err);
-			res.json({ error: 'Preenchimento inválido de informações!', type: err});
-			return;
+			errorHandling(err, res);
 		}
 	}
 

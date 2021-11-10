@@ -1,6 +1,7 @@
 const sql = require('mssql');
 
 const Comment = require('../models/CommentModel');
+const errorHandling = require('../utils/errorHandling');
 
 class CommentController {
 	async createComment(req, res) {
@@ -29,9 +30,7 @@ class CommentController {
 
 			res.json({ id: id}).status(201);
 		} catch (err) {
-			console.error(err);
-			res.json({ error: 'Preenchimento inválido de informações!', type: err });
-			return;
+			errorHandling(err, res);
 		}
 	}
 
@@ -78,9 +77,7 @@ class CommentController {
 
 			res.sendStatus(200);
 		} catch (err) {
-			console.error(err);
-			res.json({ error: 'Preenchimento inválido de informações!', type: err });
-			return;
+			errorHandling(err, res);
 		}
 	}
 
@@ -105,9 +102,7 @@ class CommentController {
 
 			res.sendStatus(200);
 		} catch (err) {
-			console.error(err);
-			res.json({ error: 'Preenchimento inválido de informações!', type: err });
-			return;
+			errorHandling(err, res);
 		}
 	}
 }

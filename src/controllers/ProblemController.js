@@ -5,6 +5,7 @@ const getBlobName = require('../utils/getBlobName');
 
 const Problem = require('../models/ProblemModel');
 
+const errorHandling = require('../utils/errorHandling');;
 const locationValidation = require('../utils/locationValidation');
 const cityValidation = require('../utils/cityValidation');
 
@@ -90,9 +91,7 @@ class ProblemController {
 
 			res.status(201).json({ data: responseData.recordset[0], images: newImagesName });
 		} catch (err) {
-			console.error(err);
-			res.json({ error: 'Preenchimento inválido de informações!', type: err });
-			return;
+			errorHandling(err, res);
 		}
 	}
 
@@ -235,8 +234,7 @@ class ProblemController {
 
 			res.json(response);
 		} catch (err) {
-			console.error(err);
-			res.json({ error: 'Preenchimento inválido de informações!', type: err });
+			errorHandling(err, res);
 		}
 	}
 
@@ -274,7 +272,7 @@ class ProblemController {
 			} else if (relevance.recordset[0].IsUp != isUp) { // Caso queria trocar entre Up ou Down
 				request.query
 					`UPDATE UsersRelevance SET IsUp = ${isUp ? 1 : 0} WHERE ID = ${relevance.recordset[0].ID}`;
-					
+
 			} else { // Caso tenha apertado pela 2° vez no mesmo botão de relevancia
 				request.query
 					`DELETE FROM UsersRelevance WHERE ID = ${relevance.recordset[0].ID}`;
@@ -282,8 +280,7 @@ class ProblemController {
 
 			res.sendStatus(200);
 		} catch (err) {
-			console.error(err);
-			res.json({ error: 'Preenchimento inválido de informações!', type: err });
+			errorHandling(err, res);
 		}
 	}
 }
