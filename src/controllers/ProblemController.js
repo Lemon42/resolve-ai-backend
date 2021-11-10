@@ -239,6 +239,53 @@ class ProblemController {
 			res.json({ error: 'Preenchimento inválido de informações!', type: err });
 		}
 	}
+
+	async relevance(req, res) {
+		try {
+			let isUp;
+			if (req.params.isUp == 'true') {
+				isUp = true;
+			} else if (req.params.isUp == 'false') { 
+				isUp = false;
+			}
+			else {
+				throw 'Não foi possivel ler os parametros.';
+			}
+
+			const pool = await sql.connect(require('../config/databaseConfig'));
+			const request = pool.request();
+			request.input('problemId', sql.VarChar, req.params.problemId);
+			request.input('email', sql.VarChar, req.headers.email);
+
+			// Verificar se o problema realmente existe
+			const problem = await request.query`SELECT ID FROM Problems WHERE id = @problemId`;
+			if (problem.rowsAffected != 1) {
+				throw 'Não foi possivel localizar o problema.';
+			}
+
+			// Cadastrando
+			const relevance = await request.query
+				`SELECT * FROM UsersRelevance WHERE ProblemId = @problemId AND UserEmail = @email`;
+
+			if (relevance.rowsAffected == 0) { // Caso não tiver nada cadastrado
+				request.query
+					`INSERT INTO UsersRelevance (UserEmail,	ProblemId, IsUp) VALUES (@email, @problemId, ${isUp ? 1 : 0})`;
+
+			} else if (relevance.recordset[0].IsUp != isUp) { // Caso queria trocar entre Up ou Down
+				request.query
+					`UPDATE UsersRelevance SET IsUp = ${isUp ? 1 : 0} WHERE ID = ${relevance.recordset[0].ID}`;
+					
+			} else { // Caso tenha apertado pela 2° vez no mesmo botão de relevancia
+				request.query
+					`DELETE FROM UsersRelevance WHERE ID = ${relevance.recordset[0].ID}`;
+			}
+
+			res.sendStatus(200);
+		} catch (err) {
+			console.error(err);
+			res.json({ error: 'Preenchimento inválido de informações!', type: err });
+		}
+	}
 }
 
 module.exports = ProblemController;

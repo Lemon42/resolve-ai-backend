@@ -27,6 +27,7 @@ routes.post('/create-problem', authenticate, uploadImage.array('images[]', 5),
 routes.get('/list-problems/', authenticate, (req, res) => problemController.list(req, res));
 routes.get('/list-problems/:city', authenticate, (req, res) => problemController.listInCity(req, res));
 routes.get('/search/:title/:city/:user', authenticate,(req, res) => problemController.search(req, res));
+routes.post('/relevance/:problemId/:isUp', authenticate,(req, res) => problemController.relevance(req, res));
 
 // Comentarios
 routes.post('/create-comment', authenticate, (req, res) => commentController.createComment(req, res));
