@@ -222,7 +222,7 @@ class ProblemController {
 			});
 			const images = await Promise.all(imagesPromise);
 
-			const response = images.map((image, index) => {
+			let response = images.map((image, index) => {
 				let responseImage = image.recordset.map((object) => {
 					if (object.Name) {
 						return object.Name;
@@ -231,6 +231,13 @@ class ProblemController {
 
 				return { data: data[index], images: responseImage }
 			});
+
+			// Verificando se o usuario deu seu voto de relevancia
+			const relevancePromise = response.map(async (problem) => {
+				const relevance =  await this.getUserRelevance(problem.data.ID, req.headers.email);
+				return { ...problem, isUp: relevance.isUp };
+			});
+			response = await Promise.all(relevancePromise);
 
 			res.json(response);
 		} catch (err) {
@@ -243,7 +250,7 @@ class ProblemController {
 			let isUp;
 			if (req.params.isUp == 'true') {
 				isUp = true;
-			} else if (req.params.isUp == 'false') { 
+			} else if (req.params.isUp == 'false') {
 				isUp = false;
 			}
 			else {
@@ -281,6 +288,21 @@ class ProblemController {
 			res.sendStatus(200);
 		} catch (err) {
 			errorHandling(err, res);
+		}
+	}
+
+	async getUserRelevance(ProblemId, email) {
+		const pool = await sql.connect(require('../config/databaseConfig'));
+		const request = pool.request();
+
+		const response = await request.query
+			`SELECT IsUp FROM UsersRelevance WHERE ProblemId = ${ProblemId} AND UserEmail = ${email}`;
+
+		if (response.rowsAffected[0] == 0) {
+			return { isUp: null }
+		}
+		else {
+			return { isUp: response.recordset[0].IsUp }
 		}
 	}
 }
