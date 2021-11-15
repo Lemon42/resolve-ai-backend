@@ -10,8 +10,10 @@ const errorHandling = require('../utils/errorHandling');
 
 const blobService = azureStorage.createBlobService();
 
-class UserModel{
-	async create(req, res){
+const { BlobServiceClient } = require("@azure/storage-blob");
+
+class UserModel {
+	async create(req, res) {
 		try {
 			const user = new User(req.body.name, req.body.email, req.body.city, req.body.pass);
 			user.pass = encrypt(user.pass);
@@ -20,21 +22,21 @@ class UserModel{
 
 			// Teste para ver se o email já está cadastrado
 			const emailValidateRequest = pool.request();
-	
+
 			emailValidateRequest.input('newEmail', sql.VarChar, req.body.email);
 			const emailResult = await emailValidateRequest.query`SELECT Email FROM Users WHERE Email = @newEmail`;
 
-			if(emailResult.rowsAffected >= 1){
+			if (emailResult.rowsAffected >= 1) {
 				throw 'Email já cadastrado!';
 			}
 
 			// Teste para ver se a cidade pode ser cadastrada
 			const cityValidateRequest = pool.request();
-	
+
 			cityValidateRequest.input('newCity', sql.VarChar, req.body.city);
 			const cityResult = await cityValidateRequest.query`SELECT Name FROM City WHERE Name = @newCity`;
 
-			if(cityResult.rowsAffected != 1){
+			if (cityResult.rowsAffected != 1) {
 				throw 'Não estamos nessa cidade';
 			}
 
@@ -42,15 +44,15 @@ class UserModel{
 			let imageName = '';
 			let imageContainer = '';
 
-			if(typeof req.file === 'undefined') { // cadastro de imagem padrão
+			if (typeof req.file === 'undefined') { // cadastro de imagem padrão
 				imageName = 'default-user-image.png';
 				imageContainer = 'project';
 			} else { // envio de imagem do usuário
-				imageName = getBlobName(req.file.originalname)
+				imageName = getBlobName(req.file.originalname);
 				imageContainer = process.env.IMAGES_STORAGE_CONTAINER;
 				const stream = getStream(req.file.buffer);
 				const streamLength = req.file.buffer.length;
-		
+
 				blobService.createBlockBlobFromStream(imageContainer, imageName, stream, streamLength, err => {
 					if (err) {
 						handleError(err);
@@ -58,27 +60,74 @@ class UserModel{
 					}
 				});
 			}
-	
+
 			// Envio para o servidor
 			const request = pool.request();
-	
+
 			request.input('name', sql.VarChar, user.name);
 			request.input('email', sql.VarChar, user.email);
 			request.input('city', sql.VarChar, user.city);
 			request.input('picture', sql.VarChar, `${process.env.STORAGE_URL}/${imageContainer}/${imageName}`);
 			request.input('pass', sql.VarChar, user.pass);
-	
+
 			request.query`INSERT INTO Users (Name, Email, City, Picture, Pass) VALUES 
 				(@name, @email, @city, @picture, @pass)`;
 
 			res.sendStatus(201);
-			
+
 		} catch (err) {
 			errorHandling(err, res);
 		}
 	}
 
-	async authentication(req, res){
+	async editPhoto(req, res) {
+		try {
+			// Caso não tenha enviado uma imagem
+			if (typeof req.file === 'undefined') {
+				throw 'Sem arquivo de imagem!';
+			}
+
+			// Deletando imagem antiga
+			const pool = await sql.connect(require('../config/databaseConfig'));
+			const request = pool.request();
+			request.input('email', sql.VarChar, req.headers.email);
+
+			// Pegando nome da imagem antiga
+			const oldImageRequest = await request.query`SELECT Picture FROM Users WHERE Email = @email`;
+			const oldImageImageUrl = oldImageRequest.recordset[0].Picture;
+			let split = oldImageImageUrl.split('/');
+			const oldImageName = split[split.length - 1];
+
+			// Deletando imagem antiga
+			const blobServiceClient = await BlobServiceClient.fromConnectionString(process.env.AZURE_STORAGE_CONNECTION_STRING);
+			const containerClient = await blobServiceClient.getContainerClient(process.env.IMAGES_STORAGE_CONTAINER);
+			containerClient.deleteBlob(oldImageName);
+
+			// Upload da nova imagem de perfil
+			const imageName = getBlobName(req.file.originalname);
+			const imageContainer = process.env.IMAGES_STORAGE_CONTAINER;
+			const stream = getStream(req.file.buffer);
+			const streamLength = req.file.buffer.length;
+
+			blobService.createBlockBlobFromStream(imageContainer, imageName, stream, streamLength, err => {
+				if (err) {
+					handleError(err);
+					return;
+				}
+			});
+
+			request.input('newImage', sql.VarChar, `${process.env.STORAGE_URL}/${imageContainer}/${imageName}`);
+
+			// Editando no banco de dados
+			request.query`UPDATE Users SET Picture = @newImage WHERE Email = @email`;
+
+			res.sendStatus(200);
+		} catch (err) {
+			errorHandling(err, res);
+		}
+	}
+
+	async authentication(req, res) {
 		const pool = await sql.connect(require('../config/databaseConfig'));
 		const request = pool.request();
 
@@ -86,9 +135,9 @@ class UserModel{
 		request.input('pass', sql.VarChar, encrypt(req.body.pass));
 
 		const user = await request.query`SELECT * FROM Users WHERE Email = @email AND Pass = @pass`;
-		
-		if(user.rowsAffected == 1){ // Autenticado
-			if(req.body.type == 'mobile' || req.body.type == 'desktop'){
+
+		if (user.rowsAffected == 1) { // Autenticado
+			if (req.body.type == 'mobile' || req.body.type == 'desktop') {
 				const token = cryptoJS.MD5(Math.random().toString().replace(/0\./, '')).toString();
 				request.query`INSERT INTO Authentications
 					(Token, Account, AccountType, CreateDate)
@@ -117,10 +166,10 @@ class UserModel{
 
 		const validate = await request.query`SELECT * FROM Authentications
 			WHERE Account = @email AND Token = @token`;
-		
-		if(validate.rowsAffected == 1){ // Autenticado
+
+		if (validate.rowsAffected == 1) { // Autenticado
 			const user = await request.query`SELECT * FROM Users WHERE Email = @email`;
-			
+
 			res.json({
 				picture: user.recordset[0].Picture,
 				name: user.recordset[0].Name,
@@ -140,10 +189,10 @@ class UserModel{
 		const response = await request.query`DELETE FROM Authentications 
 			WHERE account = @email AND token = @token`;
 
-		if(response.rowsAffected == 1){
+		if (response.rowsAffected == 1) {
 			res.sendStatus(200);
 		} else {
-			res.json({ error: 'Credenciais invalidas!'});
+			res.json({ error: 'Credenciais invalidas!' });
 		}
 	}
 }

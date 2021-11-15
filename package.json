@@ -6,6 +6,7 @@
 	"author": "Everton Dias <evertonsrdias@gmail.com>",
 	"license": "MIT",
 	"dependencies": {
+		"@azure/storage-blob": "^12.8.0",
 		"azure-storage": "^2.10.3",
 		"cors": "^2.8.5",
 		"crypto-js": "^4.0.0",
