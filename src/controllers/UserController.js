@@ -98,10 +98,12 @@ class UserModel {
 			let split = oldImageImageUrl.split('/');
 			const oldImageName = split[split.length - 1];
 
-			// Deletando imagem antiga
-			const blobServiceClient = await BlobServiceClient.fromConnectionString(process.env.AZURE_STORAGE_CONNECTION_STRING);
-			const containerClient = await blobServiceClient.getContainerClient(process.env.IMAGES_STORAGE_CONTAINER);
-			containerClient.deleteBlob(oldImageName);
+			if (oldImageName != `${process.env.STORAGE_URL}/project/default-user-image.png`) {
+				// Deletando imagem antiga
+				const blobServiceClient = await BlobServiceClient.fromConnectionString(process.env.AZURE_STORAGE_CONNECTION_STRING);
+				const containerClient = await blobServiceClient.getContainerClient(process.env.IMAGES_STORAGE_CONTAINER);
+				containerClient.deleteBlob(oldImageName);
+			}
 
 			// Upload da nova imagem de perfil
 			const imageName = getBlobName(req.file.originalname);
@@ -194,6 +196,21 @@ class UserModel {
 		} else {
 			res.json({ error: 'Credenciais invalidas!' });
 		}
+	}
+
+	async userInfo(req, res) {
+		const pool = await sql.connect(require('../config/databaseConfig'));
+		const request = pool.request();
+
+		request.input('email', sql.VarChar, req.headers.email);
+
+		const problems = await request.query`SELECT ID FROM ProblemUser WHERE Account = @email`;
+		const comments = await request.query`SELECT ID FROM Comments WHERE UserEmail = @email`;
+		const relevance = await request.query`SELECT ID FROM UsersRelevance WHERE UserEmail = @email`;
+
+		let interactions = comments.rowsAffected[0] + relevance.rowsAffected[0];
+
+		res.json({ problems: problems.rowsAffected[0], interactions: interactions });
 	}
 }
 

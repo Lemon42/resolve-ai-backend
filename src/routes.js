@@ -20,6 +20,7 @@ routes.post('/login', (req, res) => userController.authentication(req, res));
 routes.post('/validate', (req, res) => userController.validate(req, res));
 routes.delete('/logout', (req, res) => userController.logout(req, res));
 routes.get('/user-problems', authenticate, (req, res) => userController.getUserProblems(req, res));
+routes.get('/user-info', authenticate, (req, res) => userController.userInfo(req, res));
 routes.put('/profile-picture', authenticate, uploadImage.single('picture'), (req, res) => userController.editPhoto(req, res));
 
 // Problemas
