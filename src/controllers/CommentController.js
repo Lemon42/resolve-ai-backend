@@ -3,6 +3,9 @@ const sql = require('mssql');
 const Comment = require('../models/CommentModel');
 const errorHandling = require('../utils/errorHandling');
 
+const ProblemController = require('./ProblemController');
+const problemController = new ProblemController();
+
 class CommentController {
 	async createComment(req, res) {
 		try {
@@ -56,7 +59,10 @@ class CommentController {
 		});
 		const response = await Promise.all(data);
 
-		res.json({ problemId: req.params.id, comments: response });
+		// Enviar relevancia do usuario
+		const relevance = await problemController.getUserRelevance(req.params.id, req.headers.email);
+
+		res.json({ problemId: req.params.id, comments: response, isUp: relevance.isUp });
 	}
 
 	async deleteComment(req, res) {
