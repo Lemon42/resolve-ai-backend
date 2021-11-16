@@ -109,7 +109,7 @@ class ProblemController {
 		});
 		const images = await Promise.all(imagesPromise);
 
-		const response = images.map((image, index) => {
+		let response = images.map((image, index) => {
 			let responseImage = image.recordset.map((object) => {
 				if (object.Name) {
 					return object.Name
@@ -118,6 +118,13 @@ class ProblemController {
 
 			return { data: data[index], images: responseImage }
 		});
+
+		// Verificando se o usuario deu seu voto de relevancia
+		const relevancePromise = response.map(async (problem) => {
+			const relevance =  await this.getUserRelevance(problem.data.ID, req.headers.email);
+			return { ...problem, isUp: relevance.isUp };
+		});
+		response = await Promise.all(relevancePromise);
 
 		res.json(response);
 	}
