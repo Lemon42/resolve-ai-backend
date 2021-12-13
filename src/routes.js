@@ -9,6 +9,8 @@ const ProblemController = require('./controllers/ProblemController');
 const problemController = new ProblemController();
 const CommentController = require('./controllers/CommentController');
 const commentController = new CommentController();
+const SolvedProblemsController = require('./controllers/SolvedProblemsController');
+const solvedProblemsController = new SolvedProblemsController();
 
 const authenticate = require('./utils/authenticateRequest');
 
@@ -36,5 +38,9 @@ routes.post('/create-comment', authenticate, (req, res) => commentController.cre
 routes.get('/comment/:id', authenticate, (req, res) => commentController.listComments(req, res));
 routes.delete('/comment/:commentId/problem/:problemId', authenticate, (req, res) => commentController.deleteComment(req, res));
 routes.post('/report-comment/:commentId/problem/:problemId', authenticate, (req, res) => commentController.reportComment(req, res));
+
+// Problemas resolvidos
+routes.post('/create-solved-problem', authenticate, uploadImage.array('images[]', 5), 
+	(req, res) => solvedProblemsController.create(req, res));
 
 module.exports = routes;

@@ -12,7 +12,7 @@ const blobService = azureStorage.createBlobService();
 
 const { BlobServiceClient } = require("@azure/storage-blob");
 
-class UserModel {
+class UserController {
 	async create(req, res) {
 		try {
 			const user = new User(req.body.name, req.body.email, req.body.city, req.body.pass);
@@ -130,71 +130,85 @@ class UserModel {
 	}
 
 	async authentication(req, res) {
-		const pool = await sql.connect(require('../config/databaseConfig'));
-		const request = pool.request();
+		try {
+			const pool = await sql.connect(require('../config/databaseConfig'));
+			const request = pool.request();
 
-		request.input('email', sql.VarChar, req.body.email.toLowerCase());
-		request.input('pass', sql.VarChar, encrypt(req.body.pass));
+			request.input('email', sql.VarChar, req.body.email.toLowerCase());
+			request.input('pass', sql.VarChar, encrypt(req.body.pass));
 
-		const user = await request.query`SELECT * FROM Users WHERE Email = @email AND Pass = @pass`;
+			const user = await request.query`SELECT * FROM Users WHERE Email = @email AND Pass = @pass`;
 
-		if (user.rowsAffected == 1) { // Autenticado
-			if (req.body.type == 'mobile' || req.body.type == 'desktop') {
-				const token = cryptoJS.MD5(Math.random().toString().replace(/0\./, '')).toString();
-				request.query`INSERT INTO Authentications
+			if (user.rowsAffected == 1) { // Autenticado
+				if (req.body.type == 'mobile' || req.body.type == 'desktop') {
+					const token = cryptoJS.MD5(Math.random().toString().replace(/0\./, '')).toString();
+					request.query`INSERT INTO Authentications
 					(Token, Account, AccountType, CreateDate)
 					VALUES (${token}, @email, ${req.body.type}, GETDATE())`;
 
-				res.json({
-					token: token,
-					email: user.recordset[0].Email,
-					picture: user.recordset[0].Picture,
-					name: user.recordset[0].Name,
-				})
-			} else {
-				res.json({ error: 'Tipo de conta inválida' });
+					res.json({
+						token: token,
+						email: user.recordset[0].Email,
+						picture: user.recordset[0].Picture,
+						name: user.recordset[0].Name,
+					})
+				} else {
+					throw 'Tipo de conta inválida';
+				}
+			} else { // Não autenticado
+				throw 'Credenciais invalidas!';
 			}
-		} else { // Não autenticado
-			res.json({ error: 'Credenciais inválidas!' });
+			
+		} catch (err) {
+			errorHandling(err, res);
 		}
 	}
 
 	async validate(req, res) {
-		const pool = await sql.connect(require('../config/databaseConfig'));
-		const request = pool.request();
+		try {
+			const pool = await sql.connect(require('../config/databaseConfig'));
+			const request = pool.request();
 
-		request.input('email', sql.VarChar, req.body.email.toLowerCase());
-		request.input('token', sql.VarChar, req.body.token);
+			request.input('email', sql.VarChar, req.body.email.toLowerCase());
+			request.input('token', sql.VarChar, req.body.token);
 
-		const validate = await request.query`SELECT * FROM Authentications
+			const validate = await request.query`SELECT * FROM Authentications
 			WHERE Account = @email AND Token = @token`;
 
-		if (validate.rowsAffected == 1) { // Autenticado
-			const user = await request.query`SELECT * FROM Users WHERE Email = @email`;
+			if (validate.rowsAffected == 1) { // Autenticado
+				const user = await request.query`SELECT * FROM Users WHERE Email = @email`;
 
-			res.json({
-				picture: user.recordset[0].Picture,
-				name: user.recordset[0].Name,
-			})
-		} else { // Não autenticado
-			res.json({ error: 'Credenciais inválidas!' });
+				res.json({
+					picture: user.recordset[0].Picture,
+					name: user.recordset[0].Name,
+				})
+			} else { // Não autenticado
+				throw 'Credenciais invalidas!';
+			}
+		} catch (err) {
+			errorHandling(err, res);
 		}
 	}
 
 	async logout(req, res) {
-		const pool = await sql.connect(require('../config/databaseConfig'));
-		const request = pool.request();
+		try {
+			const pool = await sql.connect(require('../config/databaseConfig'));
+			const request = pool.request();
 
-		request.input('token', sql.VarChar, req.body.token);
-		request.input('email', sql.VarChar, req.body.email);
+			request.input('token', sql.VarChar, req.body.token);
+			request.input('email', sql.VarChar, req.body.email);
 
-		const response = await request.query`DELETE FROM Authentications 
+			const response = await request.query`DELETE FROM Authentications 
 			WHERE account = @email AND token = @token`;
 
-		if (response.rowsAffected == 1) {
-			res.sendStatus(200);
-		} else {
-			res.json({ error: 'Credenciais invalidas!' });
+			if (response.rowsAffected == 1) {
+				res.sendStatus(200);
+			} else {
+				throw 'Credenciais invalidas!';
+			}
+
+		} catch (err) {
+			errorHandling(err, res);
 		}
 	}
 
@@ -214,4 +228,4 @@ class UserModel {
 	}
 }
 
-module.exports = UserModel;
+module.exports = UserController;
