@@ -19,9 +19,8 @@ class ProblemController {
 			// Descobrindo a cidade onde está localizado o problema
 			let city = '';
 			if (req.body.latitude && req.body.longitude) {
-				console.log('okay')
 				city = await locationValidation(req.body.latitude, req.body.longitude);
-				if (city == false) {
+				if (!city) {
 					res.json({ error: 'Não estamos nessa cidade' });
 					return;
 				}

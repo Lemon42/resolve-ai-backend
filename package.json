@@ -22,9 +22,11 @@
 	"scripts": {
 		"dev": "NODE_ENV=test nodemon src/server.js",
 		"production": "NODE_ENV=production nodemon src/server.js",
-		"start": "node src/server.js"
+		"start": "node src/server.js",
+		"test": "jest"
 	},
 	"devDependencies": {
+		"jest": "^27.4.5",
 		"nodemon": "^2.0.7"
 	}
 }

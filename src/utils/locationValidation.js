@@ -2,7 +2,7 @@ const axios = require('axios');
 const sql = require('mssql');
 
 async function locationValidation(lat, lon) {
-	return await axios.get(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`)
+	return axios.get(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`)
 		.then(async (response) => {
 			const pool = await sql.connect(require('../config/databaseConfig'));
 			const request = pool.request();
@@ -23,8 +23,10 @@ async function locationValidation(lat, lon) {
 			return false;
 		})
 		.catch((err) => {
-			console.log(err);
-			return false;
+			var config = require('../config/databaseConfig')
+			console.log(config)
+
+			return 'false 3';
 		})
 }
 
