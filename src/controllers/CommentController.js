@@ -1,4 +1,4 @@
-const sql = require('mssql');
+const { poolPromise, sql } = require('../database');
 
 const Comment = require('../models/CommentModel');
 const errorHandling = require('../utils/errorHandling');
@@ -11,7 +11,7 @@ class CommentController {
 		try {
 			const comment = new Comment(req.body.content);
 
-			const pool = await sql.connect(require('../config/databaseConfig'));
+			const pool = await poolPromise;
 			const request = pool.request();
 
 			request.input('content', sql.VarChar, comment.content);
@@ -38,7 +38,7 @@ class CommentController {
 	}
 
 	async listComments(req, res) {
-		const pool = await sql.connect(require('../config/databaseConfig'));
+		const pool = await poolPromise;
 		const request = pool.request();
 
 		request.input('id', sql.Int, req.params.id);
@@ -67,7 +67,7 @@ class CommentController {
 
 	async deleteComment(req, res) {
 		try {
-			const pool = await sql.connect(require('../config/databaseConfig'));
+			const pool = await poolPromise;
 			const request = pool.request();
 
 			request.input('email', sql.VarChar, req.headers.email);
@@ -89,7 +89,7 @@ class CommentController {
 
 	async reportComment(req, res) {
 		try {
-			const pool = await sql.connect(require('../config/databaseConfig'));
+			const pool = await poolPromise;
 			const request = pool.request();
 
 			request.input('email', sql.VarChar, req.headers.email);

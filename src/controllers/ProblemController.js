@@ -1,4 +1,4 @@
-const sql = require('mssql');
+const { poolPromise, sql } = require('../database');
 const azureStorage = require('azure-storage');
 const getStream = require('into-stream');
 const getBlobName = require('../utils/getBlobName');
@@ -52,7 +52,7 @@ class ProblemController {
 			}
 
 			// Envio para o servidor das informações
-			const pool = await sql.connect(require('../config/databaseConfig'));
+			const pool = await poolPromise;
 			const request = pool.request();
 
 			request.input('title', sql.VarChar, problem.title);
@@ -95,7 +95,7 @@ class ProblemController {
 	}
 
 	async list(req, res) {
-		const pool = await sql.connect(require('../config/databaseConfig'));
+		const pool = await poolPromise;
 		const request = pool.request();
 		const dataResponse = await request.query(`SELECT * FROM Problems`);
 
@@ -129,7 +129,7 @@ class ProblemController {
 	}
 
 	async listInCity(req, res) {
-		const pool = await sql.connect(require('../config/databaseConfig'));
+		const pool = await poolPromise;
 		const request = pool.request();
 
 		request.input('city', sql.VarChar, req.params.city);
@@ -172,7 +172,7 @@ class ProblemController {
 			let query = 'SELECT * FROM Problems ';
 			let queryParams = [];
 
-			const pool = await sql.connect(require('../config/databaseConfig'));
+			const pool = await poolPromise;
 			const request = pool.request();
 
 			request.input('title', sql.VarChar, '%' + params.title + '%');
@@ -263,7 +263,7 @@ class ProblemController {
 				throw 'Não foi possivel ler os parametros.';
 			}
 
-			const pool = await sql.connect(require('../config/databaseConfig'));
+			const pool = await poolPromise;
 			const request = pool.request();
 			request.input('problemId', sql.VarChar, req.params.problemId);
 			request.input('email', sql.VarChar, req.headers.email);
@@ -298,7 +298,7 @@ class ProblemController {
 	}
 
 	async getUserRelevance(ProblemId, email) {
-		const pool = await sql.connect(require('../config/databaseConfig'));
+		const pool = await poolPromise;
 		const request = pool.request();
 
 		const response = await request.query

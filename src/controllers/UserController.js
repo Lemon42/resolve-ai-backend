@@ -1,4 +1,4 @@
-const sql = require('mssql');
+const { poolPromise, sql } = require('../database');
 const azureStorage = require('azure-storage');
 const getStream = require('into-stream');
 const cryptoJS = require('crypto-js');
@@ -18,7 +18,7 @@ class UserController {
 			const user = new User(req.body.name, req.body.email, req.body.city, req.body.pass);
 			user.pass = encrypt(user.pass);
 
-			const pool = await sql.connect(require('../config/databaseConfig'));
+			const pool = await poolPromise;
 
 			// Teste para ver se o email já está cadastrado
 			const emailValidateRequest = pool.request();
@@ -88,7 +88,7 @@ class UserController {
 			}
 
 			// Deletando imagem antiga
-			const pool = await sql.connect(require('../config/databaseConfig'));
+			const pool = await poolPromise;
 			const request = pool.request();
 			request.input('email', sql.VarChar, req.headers.email);
 
@@ -131,7 +131,7 @@ class UserController {
 
 	async authentication(req, res) {
 		try {
-			const pool = await sql.connect(require('../config/databaseConfig'));
+			const pool = await poolPromise;
 			const request = pool.request();
 
 			request.input('email', sql.VarChar, req.body.email.toLowerCase());
@@ -166,7 +166,7 @@ class UserController {
 
 	async validate(req, res) {
 		try {
-			const pool = await sql.connect(require('../config/databaseConfig'));
+			const pool = await poolPromise;
 			const request = pool.request();
 
 			request.input('email', sql.VarChar, req.body.email.toLowerCase());
@@ -192,7 +192,7 @@ class UserController {
 
 	async logout(req, res) {
 		try {
-			const pool = await sql.connect(require('../config/databaseConfig'));
+			const pool = await poolPromise;
 			const request = pool.request();
 
 			request.input('token', sql.VarChar, req.body.token);
@@ -213,7 +213,7 @@ class UserController {
 	}
 
 	async userInfo(req, res) {
-		const pool = await sql.connect(require('../config/databaseConfig'));
+		const pool = await poolPromise;
 		const request = pool.request();
 
 		request.input('email', sql.VarChar, req.headers.email);

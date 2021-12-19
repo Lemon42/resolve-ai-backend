@@ -1,4 +1,4 @@
-const sql = require('mssql');
+const { poolPromise, sql } = require('../database');
 const azureStorage = require('azure-storage');
 const getStream = require('into-stream');
 const getBlobName = require('../utils/getBlobName');
@@ -14,7 +14,7 @@ const blobService = azureStorage.createBlobService();
 class SolvedProblemController {
 	async create(req, res) {
 		try {
-			const pool = await sql.connect(require('../config/databaseConfig'));
+			const pool = await poolPromise;
 			const request = pool.request();
 
 			// Validando dados
