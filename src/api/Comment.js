@@ -3,7 +3,7 @@ const { poolPromise, sql } = require('../database');
 const Comment = require('../models/CommentModel');
 const errorHandling = require('../utils/errorHandling');
 
-const ProblemController = require('./ProblemController');
+const ProblemController = require('./Problem');
 const problemController = new ProblemController();
 
 class CommentController {

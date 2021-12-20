@@ -26,5 +26,5 @@ app.listen(process.env.PORT || 3333, () => {
 	var logDate = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
 
 	console.clear();
-	console.log(`O servidor está no ar!\n\n  + grupo: Quarteto Fantástico\n  + url: ${process.env.SERVER_URL}/\n  + feito com: 💙 e ☕\n\n-> Última atualização às ${logDate}\n`);
+	console.log(`O servidor está no ar!\n\n  + autor: Everton Dias\n  + url: ${process.env.SERVER_URL}/\n  + feito com: 💙 e ☕\n\n-> Última atualização às ${logDate}\n`);
 });

@@ -3,44 +3,42 @@ const routes = require('express').Router();
 const multer = require('multer');
 const uploadImage = multer(require('./config/multerImage'));
 
-const UserController = require('./controllers/UserController');
+const UserController = require('./api/User');
 const userController = new UserController();
-const ProblemController = require('./controllers/ProblemController');
+const ProblemController = require('./api/Problem');
 const problemController = new ProblemController();
-const CommentController = require('./controllers/CommentController');
+const CommentController = require('./api/Comment');
 const commentController = new CommentController();
-const SolvedProblemsController = require('./controllers/SolvedProblemsController');
+const SolvedProblemsController = require('./api/SolvedProblems');
 const solvedProblemsController = new SolvedProblemsController();
 
 const authenticate = require('./utils/authenticateRequest');
 
 routes.get('/test', (req, res) => res.json({ status: 'O serviço da API está ativo!' }));
 
-/// Usuario
-routes.post('/create-user', uploadImage.single('picture'), (req, res) => userController.create(req, res));
-routes.post('/login', (req, res) => userController.authentication(req, res));
-routes.post('/validate', (req, res) => userController.validate(req, res));
-routes.delete('/logout', (req, res) => userController.logout(req, res));
-routes.get('/user-problems', authenticate, (req, res) => userController.getUserProblems(req, res));
+// Usuario
+routes.post('/create-user', uploadImage.single('picture'), userController.create);
+routes.post('/login', userController.authentication);
+routes.post('/validate', userController.validate);
+routes.delete('/logout', userController.logout);
+routes.get('/user-problems', authenticate, (req, res) => userController.getUserProblem(req, res));
 routes.get('/user-info', authenticate, (req, res) => userController.userInfo(req, res));
 routes.put('/profile-picture', authenticate, uploadImage.single('picture'), (req, res) => userController.editPhoto(req, res));
 
 // Problemas
-routes.post('/create-problem', authenticate, uploadImage.array('images[]', 5),
-	(req, res) => problemController.create(req, res));
+routes.post('/create-problem', authenticate, uploadImage.array('images[]', 5), problemController.create);
 routes.get('/list-problems/', authenticate, (req, res) => problemController.list(req, res));
 routes.get('/list-problems/:city', authenticate, (req, res) => problemController.listInCity(req, res));
 routes.get('/search/:title/:city/:user', authenticate,(req, res) => problemController.search(req, res));
 routes.post('/relevance/:problemId/:isUp', authenticate,(req, res) => problemController.relevance(req, res));
 
 // Comentarios
-routes.post('/create-comment', authenticate, (req, res) => commentController.createComment(req, res));
-routes.get('/comment/:id', authenticate, (req, res) => commentController.listComments(req, res));
-routes.delete('/comment/:commentId/problem/:problemId', authenticate, (req, res) => commentController.deleteComment(req, res));
-routes.post('/report-comment/:commentId/problem/:problemId', authenticate, (req, res) => commentController.reportComment(req, res));
+routes.post('/create-comment', authenticate, commentController.createComment);
+routes.get('/comment/:id', authenticate, commentController.listComments);
+routes.delete('/comment/:commentId/problem/:problemId', authenticate, commentController.deleteComment);
+routes.post('/report-comment/:commentId/problem/:problemId', authenticate, commentController.reportComment);
 
 // Problemas resolvidos
-routes.post('/create-solved-problem', authenticate, uploadImage.array('images[]', 5), 
-	(req, res) => solvedProblemsController.create(req, res));
+routes.post('/create-solved-problem', uploadImage.array('images[]', 5), solvedProblemsController.create);
 
 module.exports = routes;
