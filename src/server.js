@@ -2,7 +2,7 @@ const path = require('path');
 
 require('dotenv').config({
 	path: process.env.NODE_ENV === "test"
-		? path.resolve(__dirname, '..', '.env.testing')
+		? path.resolve(__dirname, '..', '.env.dev')
 		: path.resolve(__dirname, '..', '.env')
 });
 

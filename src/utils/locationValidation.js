@@ -23,10 +23,8 @@ async function locationValidation(lat, lon) {
 			return false;
 		})
 		.catch((err) => {
-			var config = require('../config/databaseConfig')
-			console.log(config)
-
-			return 'false 3';
+			console.log(err);
+			return false;
 		})
 }
 
