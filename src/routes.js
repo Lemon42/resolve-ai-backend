@@ -12,11 +12,12 @@ const commentController = new CommentController();
 const SolvedProblemsController = require('./api/SolvedProblems');
 const solvedProblemsController = new SolvedProblemsController();
 
-const authenticate = require('./utils/authenticateRequest');
+const authenticate = require('./middlewares/authenticateUser');
+const authenticateAdmin = require('./middlewares/authenticateAdmin');
 
 routes.get('/test', (req, res) => res.json({ status: 'O serviço da API está ativo!' }));
 
-// Usuario
+// Usuário
 routes.post('/create-user', uploadImage.single('picture'), userController.create);
 routes.post('/login', userController.authentication);
 routes.post('/validate', userController.validate);
@@ -29,16 +30,16 @@ routes.put('/profile-picture', authenticate, uploadImage.single('picture'), (req
 routes.post('/create-problem', authenticate, uploadImage.array('images[]', 5), problemController.create);
 routes.get('/list-problems/', authenticate, (req, res) => problemController.list(req, res));
 routes.get('/list-problems/:city', authenticate, (req, res) => problemController.listInCity(req, res));
-routes.get('/search/:title/:city/:user', authenticate,(req, res) => problemController.search(req, res));
-routes.post('/relevance/:problemId/:isUp', authenticate,(req, res) => problemController.relevance(req, res));
+routes.get('/search/:title/:city/:user', authenticate, (req, res) => problemController.search(req, res));
+routes.post('/relevance/:problemId/:isUp', authenticate, (req, res) => problemController.relevance(req, res));
 
-// Comentarios
+// Comentários
 routes.post('/create-comment', authenticate, commentController.createComment);
 routes.get('/comment/:id', authenticate, commentController.listComments);
 routes.delete('/comment/:commentId/problem/:problemId', authenticate, commentController.deleteComment);
 routes.post('/report-comment/:commentId/problem/:problemId', authenticate, commentController.reportComment);
 
 // Problemas resolvidos
-routes.post('/create-solved-problem', uploadImage.array('images[]', 5), solvedProblemsController.create);
+routes.post('/create-solved-problem', authenticateAdmin, uploadImage.array('images[]', 5), solvedProblemsController.create);
 
 module.exports = routes;

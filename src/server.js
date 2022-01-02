@@ -1,14 +1,13 @@
 const path = require('path');
+const express = require('express');
+const morgan = require('morgan');
+const cors = require('cors');
 
 require('dotenv').config({
 	path: process.env.NODE_ENV === "test"
 		? path.resolve(__dirname, '..', '.env.dev')
 		: path.resolve(__dirname, '..', '.env')
 });
-
-const express = require('express');
-const morgan = require('morgan');
-const cors = require('cors');
 
 const app = express();
 
